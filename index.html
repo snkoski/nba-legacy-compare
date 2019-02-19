@@ -36,13 +36,19 @@
   //     elem[0].parentNode.removeChild(elem[0])
   //   }
   // }
-
+  let hideData = []
+  let currentDataLength = data.length
+  let key = function(d){
+    return d["Player Name"]
+  }
   let margin = 30
   let width = 800
   let height = 800
+  let xStat = "G"
+  let yStat = "WS"
 
-  let xScale = d3.scaleLinear().domain([500, d3.max(data, (d) => d["G"])]).range([0 + margin, width - margin]).nice()
-  let yScale = d3.scaleLinear().domain([0, d3.max(data, (d) => d["WS"])]).range([height - margin, margin]).nice()
+  let xScale = d3.scaleLinear().domain([0, d3.max(data, (d) => d[xStat])]).range([0 + margin, width - margin]).nice()
+  let yScale = d3.scaleLinear().domain([0, d3.max(data, (d) => d[yStat])]).range([height - margin, margin]).nice()
 
 
   let xAxis = d3.axisBottom()
@@ -67,20 +73,20 @@
      .attr("id", "circles")
      .attr("clip-path", "url(#chart-area)")
      .selectAll("circle")
-     .data(data)
+     .data(data, key)
      .enter()
      .append("circle")
-      .attr("cx", (d) =>xScale(d["G"]))
-      .attr("cy", (d) => yScale(d["WS"]))
-      .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
-      // .attr("r", 5)
+      .attr("cx", (d) =>xScale(d[xStat]))
+      .attr("cy", (d) => yScale(d[yStat]))
+      // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
+      .attr("r", 10)
 
   svg.selectAll("text")
-    .data(data)
+    .data(data, key)
     .enter()
     .append("text")
-      .attr("x", (d) => xScale(d["G"]))
-      .attr("y", (d) => yScale(d["WS"]))
+      .attr("x", (d) => xScale(d[xStat]))
+      .attr("y", (d) => yScale(d[yStat]))
       .text((d) => d["Player Name"])
       .attr("fill",  "red")
 
@@ -110,46 +116,49 @@
 
     if(ax == 'y') {
       console.log("AX Y", ax)
+      yStat = cat
       yScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
       svg.selectAll("circle")
-         .data(result)
+         .data(data, key)
          .transition()
          // .delay((d, i) => i / result.length * 1000)
          .duration(1000)
-         .attr("cy", (d) => yScale(d))
-         .attr('fill', (d) => { return "rgb(" + colorScale(d) + ", 0, 0)"})
+         .attr("cy", (d) => yScale(d[cat]))
+         .attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
          // .attr('fill', (d) => { return "rgb(0, " + colorScale(d) + ", 0)"})
          // .attr('fill', (d) => { return "rgb(0, 0, " + colorScale(d) + ")"})
 
        svg.selectAll("text")
-         .data(result)
+         .data(data, key)
          .transition()
          // .delay((d, i) => i / result.length * 1000)
          .duration(1000)
-         .attr("y", (d) => yScale(d))
+         .attr("y", (d) => yScale(d[cat]))
 
        svg.select(".y.axis")
           .transition()
           .duration(1000)
           .call(yAxis)
     } else {
+      xStat = cat
       console.log("AX X", data);
       xScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
 
       svg.selectAll("circle")
-         .data(result)
+         .data(data, key)
          .transition()
          .duration(1000)
          .on("start", function() {d3.select(this).attr("fill", "magenta").attr("r", 3)})
-         .attr("cx", (d) => xScale(d))
-         .on("end", function() { d3.select(this).attr('fill', (d) => { return "rgb(" + colorScale(d) + ", 0, 0)"}).attr("r", (d) =>  Math.sqrt( d / Math.PI ))})
-
+         .attr("cx", (d) => xScale(d[cat]))
+         .on("end", function() { d3.select(this).attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
+         // .attr("r", (d) =>  Math.sqrt( d[cat] / Math.PI ))})
+         .attr("r", 10)})
 
        svg.selectAll("text")
-         .data(result)
+         .data(data, key)
          .transition()
          .duration(1000)
-         .attr("x", (d) => xScale(d))
+         .attr("x", (d) => xScale(d[cat]))
 
          svg.select(".x.axis")
             .transition()
@@ -159,7 +168,87 @@
 
    });
 
+  d3.selectAll(".playerCheckBox").on('click', (d, i, el) => {
+    if(el[i].checked != true) {
+      console.log("EL", el[i].value);
+      let found = data.findIndex(x => x["Player Name"] === el[i].value)
+      console.log("FOUND", found);
+      // console.log("CHECKBOX",data.indexOf(data[i]));
+      hideData.push(data[found])
+      data.splice(data.indexOf(data[found]), 1)
+      console.log("IF HIDE", hideData);
+      console.log("IF NEW DATA", data);
 
+    } else {
+      let found = hideData.findIndex(x => x["Player Name"] === el[i].value)
+      data.push(hideData[found])
+      hideData.splice(hideData.indexOf(hideData[found]), 1)
+      console.log("ELSE HIDE", hideData);
+      console.log("ELSE NEW DATA", data);
+    }
+    // currentDataLength = data.length
+    console.log("CURRENT DATA LENGTH", currentDataLength);
+  })
+
+  d3.select("#test-btn").on("click", (d, i , el) => {
+    console.log("CLICK", xStat)
+    let xResult = data.map(a => a[xStat])
+    let yResult = data.map(a => a[yStat])
+    xScale.domain([d3.min(xResult, function(d) { return d }), d3.max(xResult, function(d) { return d })]);
+    yScale.domain([d3.min(yResult, function(d) { return d }), d3.max(yResult, function(d) { return d })]);
+
+    let newCircles = svg.selectAll("circle")
+                        .data(data, key)
+
+    if(data.length > currentDataLength) {
+      newCircles.enter()
+         .append("circle")
+         .attr("cx", width)
+         .attr("cy", (d) => yScale(d[yStat]))
+         .attr("r", 10)
+         // .attr("fill", (d) => "rgb(0,255,0)")
+         .merge(newCircles)
+         .transition()
+         .duration(500)
+         .attr("cx", (d) => xScale(d[xStat]))
+         .attr("cy", (d) => yScale(d[yStat]))
+         // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
+         .attr("r", 10)
+
+
+      // let texts = svg.selectAll("text")
+      //                .data(result)
+      //
+      // texts.enter()
+      //     .append("text")
+      //     .attr("x", width)
+      //     .attr("y", (d) => height - newyScale(d) + 14)
+      //     .attr("fill", "black")
+      //     .attr("text-anchor", "middle")
+      //     .text((d) => d)
+      //     .merge(texts)
+      //     .transition()
+      //     .duration(500)
+      //     .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+      //     .attr("y", (d) => height - newyScale(d) + 14)
+    } else if(data.length < currentDataLength) {
+      console.log("ELSE IF", hideData);
+      newCircles.exit()
+                .transition()
+                .duration(500)
+                .attr("cx", width)
+                .remove()
+    } else {
+      svg.selectAll("circle")
+                .data(data)
+                .transition()
+                .duration(1000)
+                .attr("cx", (d) => xScale(d[xStat]))
+                .attr("cy", (d) => yScale(d[yStat]))
+                // .attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
+    }
+    currentDataLength = data.length
+  })
 
 }
 </script>
@@ -257,6 +346,8 @@ svg = d3.select("body")
   }
   count+=1
   data.push(newObject);
+
+
   xScale.domain(d3.range(data.length))
   let result = data.map(a => a[currentStat]);
   console.log(currentStat);
@@ -372,11 +463,11 @@ svg = d3.select("body")
   <br>
   <p class="WS x" style="display: inline;" >Win Shares</p>  <p class="WS y" style="display: inline;">Win Shares</p>
   <br>
-  <p class="eFG% x" style="display: inline;" >Effective Field Goal Percent</p>  <p class="eFG%"style="display: inline;">Effective Field Goal Percent</p>
+  <p class="eFG% x" style="display: inline;" >Effective Field Goal Percent</p>  <p class="eFG% y"style="display: inline;">Effective Field Goal Percent</p>
   <br>
   <script>
       d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
-      // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
+      d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
       // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(enterTest)
 
   </script>
