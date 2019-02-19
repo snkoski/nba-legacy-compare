@@ -5,14 +5,15 @@
 <title>D3 Page Template</title>
 <script type="text/javascript" src="d3.js"></script>
 <script type="text/javascript"> function checkBoxes(data) {
-  let body = document.getElementsByTagName('body')
-
+  // let body = document.getElementsByTagName('body')
+  let checkDiv = document.getElementById('check-box-container')
 
   // data.forEach(function(player) {
   for(let count in data){
     console.log("FOR", data[count]);
     if(data[count]["Player Name"]) {
       let newCheckBox = document.createElement('input')
+      let brake = document.createElement('br')
       newCheckBox.type = 'checkbox'
       newCheckBox.id = 'player' + count
       newCheckBox.className = 'playerCheckBox'
@@ -22,8 +23,11 @@
       let text = document.createElement('span')
       text.innerText = newCheckBox.value
       console.log(text);
-      body[0].appendChild(newCheckBox)
-      body[0].appendChild(text)}
+      // body[0].appendChild(newCheckBox)
+      // body[0].appendChild(text)}
+      checkDiv.appendChild(newCheckBox)
+      checkDiv.appendChild(text)}
+      // checkDiv.appendChild(brake)
 
   }
   return data
@@ -58,7 +62,8 @@
   let yAxis = d3.axisLeft()
                 .scale(yScale)
                 .ticks(10)
-   let svg = d3.select("body").append('svg').attr('width', width).attr('height', height).attr("id", "main-svg")
+   // let svg = d3.select("body").append('svg').attr('width', width).attr('height', height).attr("id", "main-svg")
+   let svg = d3.select("#bod").append('svg').attr('width', width).attr('height', height).attr("id", "main-svg")
 
   svg.append("clipPath")
      .attr("id", "chart-area")
@@ -443,6 +448,8 @@ svg = d3.select("body")
 </head>
 <body>
   <button type="button" id="test-btn">TEST</button>
+  <div>
+  <div style="float: left;">
   <p style="display: inline;">X        </p>  <p style="display: inline;">Y</p>
   <br>
   <p class="PTS x" style="display: inline;">Points        </p>  <p class="PTS y" style="display: inline;">Points</p>
@@ -465,8 +472,14 @@ svg = d3.select("body")
   <br>
   <p class="eFG% x" style="display: inline;" >Effective Field Goal Percent</p>  <p class="eFG% y"style="display: inline;">Effective Field Goal Percent</p>
   <br>
+</div>
+<div id="check-box-container" style="display: inline;">
+
+</div>
+</div>
+<div id="bod" style="clear: both;"></div>
   <script>
-      d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
+      // d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
       d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
       // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(enterTest)
 
