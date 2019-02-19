@@ -48,11 +48,12 @@
   let margin = 30
   let width = 800
   let height = 800
-  let xStat = "G"
-  let yStat = "WS"
+  let xStat = "WS"
+  let yStat = "PER"
 
-  let xScale = d3.scaleLinear().domain([0, d3.max(data, (d) => d[xStat])]).range([0 + margin, width - margin]).nice()
-  let yScale = d3.scaleLinear().domain([0, d3.max(data, (d) => d[yStat])]).range([height - margin, margin]).nice()
+  let xScale = d3.scaleLinear().domain([d3.min(data, (d) => d[xStat]), d3.max(data, (d) => d[xStat])]).range([0 + margin, width - margin]).nice()
+
+  let yScale = d3.scaleLinear().domain([d3.min(data, (d) => d[yStat]), d3.max(data, (d) => d[yStat])]).range([height - margin, margin]).nice()
 
 
   let xAxis = d3.axisBottom()
@@ -84,7 +85,7 @@
       .attr("cx", (d) =>xScale(d[xStat]))
       .attr("cy", (d) => yScale(d[yStat]))
       // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
-      .attr("r", 10)
+      .attr("r", 4)
 
   svg.selectAll("text")
     .data(data, key)
@@ -123,6 +124,7 @@
       console.log("AX Y", ax)
       yStat = cat
       yScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
+      yScale.range([height - margin, margin]).nice()
       svg.selectAll("circle")
          .data(data, key)
          .transition()
@@ -148,7 +150,7 @@
       xStat = cat
       console.log("AX X", data);
       xScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
-
+      xScale.range([0 + margin, width - margin]).nice()
       svg.selectAll("circle")
          .data(data, key)
          .transition()
@@ -197,28 +199,70 @@
 
   d3.select("#test-btn").on("click", (d, i , el) => {
     console.log("CLICK", xStat)
-    let xResult = data.map(a => a[xStat])
+    // let xResult = data.map(a => a[xStat])
     let yResult = data.map(a => a[yStat])
-    xScale.domain([d3.min(xResult, function(d) { return d }), d3.max(xResult, function(d) { return d })]);
-    yScale.domain([d3.min(yResult, function(d) { return d }), d3.max(yResult, function(d) { return d })]);
+    xScale.domain([d3.min(data, (d) => d[xStat]), d3.max(data, (d) => d[xStat])])
+    xScale.range([0 + margin, width - margin]).nice()
+    // xScale.domain([d3.min(xResult, function(d) { return d }), d3.max(xResult, function(d) { return d })]);
+    // yScale.domain([d3.min(yResult, function(d) { return d }), d3.max(yResult, function(d) { return d })]);
+    yScale.domain([d3.min(data, (d) => d[yStat]), d3.max(data, (d) => d[yStat])])
+    yScale.range([height - margin, margin]).nice()
 
     let newCircles = svg.selectAll("circle")
                         .data(data, key)
 
+    let circleGroup = svg.select('#circles')
+
+    let newGroup = circleGroup.selectAll("circle")
+                      .data(data, key)
+
     if(data.length > currentDataLength) {
-      newCircles.enter()
-         .append("circle")
-         .attr("cx", width)
-         .attr("cy", (d) => yScale(d[yStat]))
-         .attr("r", 10)
-         // .attr("fill", (d) => "rgb(0,255,0)")
-         .merge(newCircles)
+      // newCircles.enter()
+      //    .append("circle")
+      //    .attr("cx", width)
+      //    .attr("cy", (d) => yScale(d[yStat]))
+      //    .attr("r", 4)
+      //    // .attr("fill", (d) => "rgb(0,255,0)")
+      //    .merge(newCircles)
+      //    .transition()
+      //    .duration(500)
+      //    .attr("cx", (d) => xScale(d[xStat]))
+      //    .attr("cy", (d) => yScale(d[yStat]))
+      //    .attr("r", 4)
+
+        newGroup.enter()
+                .append("circle")
+                .attr("cx", width)
+                .attr("cy", (d) => yScale(d[yStat]))
+                .attr("r", 4)
+                // .attr("fill", (d) => "rgb(0,255,0)")
+                .merge(newGroup)
+                .transition()
+                .duration(500)
+                .attr("cx", (d) => xScale(d[xStat]))
+                .attr("cy", (d) => yScale(d[yStat]))
+                .attr("r", 4)
+         // svg.append("g")
+         //    .attr("id", "circles")
+         //    .attr("clip-path", "url(#chart-area)")
+         //    .selectAll("circle")
+         //    .data(data, key)
+         //    .enter()
+         //    .append("circle")
+         //     .attr("cx", (d) =>xScale(d[xStat]))
+         //     .attr("cy", (d) => yScale(d[yStat]))
+         //     // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
+         //     .attr("r", 4)
+
+       svg.select(".x.axis")
+          .transition()
+          .duration(500)
+          .call(xAxis)
+
+      svg.select(".y.axis")
          .transition()
          .duration(500)
-         .attr("cx", (d) => xScale(d[xStat]))
-         .attr("cy", (d) => yScale(d[yStat]))
-         // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
-         .attr("r", 10)
+         .call(yAxis)
 
 
       // let texts = svg.selectAll("text")
@@ -238,11 +282,19 @@
       //     .attr("y", (d) => height - newyScale(d) + 14)
     } else if(data.length < currentDataLength) {
       console.log("ELSE IF", hideData);
-      newCircles.exit()
+      // newCircles.exit()
+      //           .transition()
+      //           .duration(500)
+      //           .attr("cx", width)
+      //           .remove()
+
+      newGroup.exit()
                 .transition()
                 .duration(500)
                 .attr("cx", width)
                 .remove()
+
+
     } else {
       svg.selectAll("circle")
                 .data(data)
@@ -251,6 +303,16 @@
                 .attr("cx", (d) => xScale(d[xStat]))
                 .attr("cy", (d) => yScale(d[yStat]))
                 // .attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
+
+                svg.select(".x.axis")
+                   .transition()
+                   .duration(500)
+                   .call(xAxis)
+
+               svg.select(".y.axis")
+                  .transition()
+                  .duration(500)
+                  .call(yAxis)
     }
     currentDataLength = data.length
   })
