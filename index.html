@@ -50,10 +50,20 @@
   let height = 800
   let xStat = "WS"
   let yStat = "PER"
+  let redArray = []
+  let greenArray = []
 
-  let xScale = d3.scaleLinear().domain([d3.min(data, (d) => d[xStat]), d3.max(data, (d) => d[xStat])]).range([0 + margin, width - margin]).nice()
 
-  let yScale = d3.scaleLinear().domain([d3.min(data, (d) => d[yStat]), d3.max(data, (d) => d[yStat])]).range([height - margin, margin]).nice()
+  let setArray = function(data) {
+    for(count in data) {
+      redArray.push(0)
+      greenArray.push(0)
+    }
+  }()
+
+  let xScale = d3.scaleLinear().domain([d3.min(data, (d) => d[xStat] - .1), d3.max(data, (d) => d[xStat]) + 1.5]).range([0 + margin, width - margin]).nice()
+
+  let yScale = d3.scaleLinear().domain([d3.min(data, (d) => d[yStat]) - .1, d3.max(data, (d) => d[yStat]) + 1.5]).range([height - margin, margin]).nice()
 
 
   let xAxis = d3.axisBottom()
@@ -71,8 +81,8 @@
      .append("rect")
      .attr("x", margin)
      .attr("y", margin)
-     .attr("width", width - margin * 3)
-     .attr("height", height - margin * 2)
+     .attr("width", width - margin)
+     .attr("height", height - margin)
 
 
   svg.append("g")
@@ -120,10 +130,25 @@
      let result = data.map(a => a[cat]);
      let colorScale = d3.scaleLinear().domain([d3.min(result), d3.max(result)]).range([0, 255])
 
+
+
+      console.log("RED", redArray);
     if(ax == 'y') {
       console.log("AX Y", ax)
       yStat = cat
-      yScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
+
+      let getColor = function(data) {
+        redArray = []
+        for(count in data){
+        let color = colorScale(data[count][cat])
+        redArray.push(color)
+       }
+      }
+      getColor(data)
+      console.log("RED", redArray[0]);
+
+
+      yScale.domain([d3.min(result, (d) => d ) - .1, d3.max(result, (d) => d ) + 1.5]);
       yScale.range([height - margin, margin]).nice()
       svg.selectAll("circle")
          .data(data, key)
@@ -131,9 +156,10 @@
          // .delay((d, i) => i / result.length * 1000)
          .duration(1000)
          .attr("cy", (d) => yScale(d[cat]))
-         .attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
+         .attr('fill', (d, i) => { return "rgb(" + redArray[i] + ", " + greenArray[i] + ", 0)"})
          // .attr('fill', (d) => { return "rgb(0, " + colorScale(d) + ", 0)"})
          // .attr('fill', (d) => { return "rgb(0, 0, " + colorScale(d) + ")"})
+         .attr("r", 10)
 
        svg.selectAll("text")
          .data(data, key)
@@ -149,17 +175,32 @@
     } else {
       xStat = cat
       console.log("AX X", data);
-      xScale.domain([d3.min(result, function(d) { return d }), d3.max(result, function(d) { return d })]);
+      // let xMin = d3.min(data, (d) => d[xStat]) - .1
+
+      xScale.domain([d3.min(data, (d) => d[xStat]) - .1, d3.max(result, (d) =>  d ) + 1.5]);
       xScale.range([0 + margin, width - margin]).nice()
+
+      let getColor = function(data) {
+        greenArray = []
+        for(count in data){
+        let color = colorScale(data[count][cat])
+        greenArray.push(color)
+       }
+      }
+      getColor(data)
+      console.log("GREEN", greenArray);
+
       svg.selectAll("circle")
          .data(data, key)
          .transition()
          .duration(1000)
-         .on("start", function() {d3.select(this).attr("fill", "magenta").attr("r", 3)})
+         // .on("start", function() {d3.select(this).attr("fill", "magenta").attr("r", 3)})
          .attr("cx", (d) => xScale(d[cat]))
-         .on("end", function() { d3.select(this).attr('fill', (d) => { return "rgb(" + colorScale(d[cat]) + ", 0, 0)"})
+         // .on("end", function() { d3.select(this).attr('fill', (d, i) => { return "rgb(0, " + greenArray[i] + ", 0)"})
          // .attr("r", (d) =>  Math.sqrt( d[cat] / Math.PI ))})
-         .attr("r", 10)})
+         // .attr("r", 10)})
+         .attr("fill", (d, i) => { return "rgb(" + redArray[i] + ", " + greenArray[i] + ", 0)"})
+         .attr("r", 10)
 
        svg.selectAll("text")
          .data(data, key)
@@ -201,11 +242,11 @@
     console.log("CLICK", xStat)
     // let xResult = data.map(a => a[xStat])
     let yResult = data.map(a => a[yStat])
-    xScale.domain([d3.min(data, (d) => d[xStat]), d3.max(data, (d) => d[xStat])])
+    xScale.domain([d3.min(data, (d) => d[xStat]) - .1, d3.max(data, (d) => d[xStat]) + 1.5])
     xScale.range([0 + margin, width - margin]).nice()
     // xScale.domain([d3.min(xResult, function(d) { return d }), d3.max(xResult, function(d) { return d })]);
     // yScale.domain([d3.min(yResult, function(d) { return d }), d3.max(yResult, function(d) { return d })]);
-    yScale.domain([d3.min(data, (d) => d[yStat]), d3.max(data, (d) => d[yStat])])
+    yScale.domain([d3.min(data, (d) => d[yStat]) - .1, d3.max(data, (d) => d[yStat]) + 1.5])
     yScale.range([height - margin, margin]).nice()
 
     let newCircles = svg.selectAll("circle")
