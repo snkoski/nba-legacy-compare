@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>D3 Page Template</title>
 <script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css">
 <script type="text/javascript"> function checkBoxes(data) {
   // let body = document.getElementsByTagName('body')
   let checkDiv = document.getElementById('check-box-container')
@@ -59,7 +60,8 @@
       redArray.push(0)
       greenArray.push(0)
     }
-  }()
+  }
+  setArray(data)
 
   let xScale = d3.scaleLinear().domain([d3.min(data, (d) => d[xStat] - .1), d3.max(data, (d) => d[xStat]) + 1.5]).range([0 + margin, width - margin]).nice()
 
@@ -95,7 +97,7 @@
       .attr("cx", (d) =>xScale(d[xStat]))
       .attr("cy", (d) => yScale(d[yStat]))
       // .attr("r", (d) =>  Math.sqrt( d["PTS"]**2 / Math.PI ));
-      .attr("r", 4)
+      .attr("r", 10)
 
   svg.selectAll("text")
     .data(data, key)
@@ -145,7 +147,7 @@
        }
       }
       getColor(data)
-      console.log("RED", redArray[0]);
+      console.log("RED", greenArray[0]);
 
 
       yScale.domain([d3.min(result, (d) => d ) - .1, d3.max(result, (d) => d ) + 1.5]);
@@ -393,6 +395,19 @@ svg = d3.select("body")
     .attr('width', xScale.bandwidth())
     .attr('fill', (d) => {
       return "rgb(0, 0, " + Math.round(d * 7.5) + ")"})
+    .on('mouseover', function() {
+      d3.select(this)
+        .attr("fill", "orange")
+    })
+    .on('mouseout', function(d) {
+      d3.select(this)
+        .transition("restoreBarColor")
+        .duration(250)
+        .attr("fill", "rgb(0, 0, " + Math.round(d * 7.5) + ")")
+    })
+    .on('click', function() {
+      sortBars()
+    })
 
   svg.selectAll('text')
   .data(arr)
@@ -482,6 +497,7 @@ svg = d3.select("body")
      .attr("width", xScale.bandwidth())
      .attr("height", (d) => newyScale(d))
 
+
   let texts = svg.selectAll("text")
                  .data(result)
 
@@ -501,6 +517,18 @@ svg = d3.select("body")
 
 
 })
+
+  let sortBars = function() {
+    svg.selectAll("rect")
+       .sort(function(a, b) {
+         return d3.ascending(a, b);
+       })
+       .transition("sortBars")
+       .duration(1000)
+       .attr("x", function(d, i) {
+         return xScale(i)
+       })
+  }
 }
 </script>
 <script type="text/javascript"> function convert(data) {
@@ -582,8 +610,8 @@ svg = d3.select("body")
 </div>
 <div id="bod" style="clear: both;"></div>
   <script>
-      // d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
-      d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
+      d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
+      // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
       // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(enterTest)
 
   </script>

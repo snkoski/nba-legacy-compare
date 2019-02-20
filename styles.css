@@ -5,3 +5,18 @@ h1 {
 .header {
   color: green;
 }
+
+rect:hover {
+  fill: orange;
+}
+
+rect {
+  -moz-transition: all 0.25s;
+  -o-transition: all 0.25s;
+  -webkit-transition: all 0.25s;
+  transition: all 0.25s;
+}
+
+text {
+  pointer-events: none;
+}
