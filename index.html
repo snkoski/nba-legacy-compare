@@ -610,8 +610,8 @@ svg = d3.select("body")
 </div>
 <div id="bod" style="clear: both;"></div>
   <script>
-      d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
-      // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
+      // d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
+      d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(drawScatter)
       // d3.csv('recent_player_stats.csv').then(convert).then(checkBoxes).then(enterTest)
 
   </script>

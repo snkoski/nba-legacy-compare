@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D3 Page Template</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawLine(data) {
+  console.table(data, ["Dates", "Points"]);
+
+  let w = 1500
+  let h = 600
+
+  let dataset = data
+  let xScale = d3.scaleTime()
+                 .domain([d3.min(dataset, function(d) { return d.index; }),d3.max(dataset, function(d) { return d.index; })])
+                 .range([0, w]);
+
+  let yScale = d3.scaleLinear()
+                 .domain([0,d3.max(dataset, function(d) { return d.points; })])
+                 .range([h, 0]);
+
+  let line = d3.line()
+               .x(function(d) { return xScale(d.index); })
+               .y(function(d) { return yScale(d.points); });
+
+  let svg = d3.select("#bod")
+              .append("svg")
+              .attr("width", w)
+              .attr("height", h);
+
+  svg.append("path")
+     .datum(dataset)
+     .attr("class", "line")
+     .attr("d", line)
+     .attr("fill", "none")
+     .attr("stroke", "#000")
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+  data.forEach(function(d) {
+    d["index"] = +d["index"]
+    d["dates"] = new Date(d["dates"]);
+    d["points"] = +d["points"];
+  })
+    return data
+    }
+</script>
+</head>
+<body>
+<div id="bod"></div>
+<!-- <div>
+  <button type="button" id="btn">Click Me</button>
+</div> -->
+  <script>
+      d3.csv('harden_points.csv').then(convert).then(drawLine);
+  </script>
+
+</body>
+</html>

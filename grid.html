@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D3 Page Template</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawGrid(data) {
+  let margin = {top: 50, right: 0, bottom: 100, left: 30},
+      width = 600 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom,
+      numPerRow = 10,
+      gridSize = Math.floor(width / 10),
+      legendElementWidth = gridSize * 2,
+      buckets = 5,
+      // colors = ["#ffffd9",#c7e9b4","#7fcdbb",#1d91c0",#253494"],
+      dataset = data,
+      count = 0;
+
+  let best_three_array = [.480, .457, .472, .461, .472, .492, .475, .451, .468, .476]
+
+  let avg_three_array = [.355, .358, .349, .357, .360, .350, .354, .358, .362, .355]
+
+  let twos = Math.round((dataset[count]["2P"] * 2) / dataset[count]["PTS"] * 100),
+      threes = Math.round((dataset[count]["3P"] * 3) / dataset[count]["PTS"] * 100),
+      free = Math.round(dataset[count]["FT"] / dataset[count]["PTS"] * 100);
+
+  console.log("3P%", dataset[count]["3P%"]);
+
+  let scale = d3.scaleLinear()
+              .domain([0, numPerRow - 1])
+              .range([0, 400])
+
+  let threesScale = d3.scaleLinear().domain([0, avg_three_array[count]]).range([0, 255])
+
+  let svg = d3.select("#bod").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("id", "main-svg")
+      // .append("g")
+      // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.selectAll("rect")
+     .data(d3.range(100))
+     .enter()
+     .append("rect")
+     .attr("x", function(d, i) { return scale(i % numPerRow)})
+     .attr("y", function(d, i) { return scale(Math.floor(i / 10))})
+     .attr("height", gridSize)
+     .attr("width", gridSize)
+     .attr("fill", function(d, i) {
+       if(i < free) {
+         return "red"
+       } else if(i < twos + free) {
+         return "green"
+       } else {
+         return "rgb(0, 0, " + threesScale(dataset[count]["3P%"]) + ")"
+       }
+     })
+     .attr("stroke-width", 2)
+     .attr("stroke", "white")
+
+  svg.append("text")
+     .attr("id", "title")
+     .attr("x", width / 2)
+     .attr("y", height + margin.top)
+     .attr("text-anchor", "middle")
+     .style("font-size", "16px")
+     .style("text-decoration", "underline")
+     .text("Harden " + dataset[count]["Year"]);
+
+  d3.select("#btn").on("click", function(d, i, e) {
+      repeat()
+  })
+
+  function repeat() {
+  //   if(count < dataset.length - 1) {
+  //   count+=1
+  // } else {
+  //   count = 0
+  // }
+  console.log("START REPEAT", count);
+   twos = Math.round((dataset[count]["2P"] * 2) / dataset[count]["PTS"] * 100)
+
+    threes = Math.round((dataset[count]["3P"] * 3) / dataset[count]["PTS"] * 100)
+
+    free = Math.round(dataset[count]["FT"] / dataset[count]["PTS"] * 100)
+
+  svg.selectAll("rect").data(d3.range(100))
+     .transition()
+     .delay(() => count * 3000)
+     .duration(3000)
+     .attr("fill", function(d, i) {
+       if(i < free) {
+         return "red"
+       } else if(i < twos + free) {
+         return "green"
+       } else {
+         return "rgb(0, 0, " + threesScale(dataset[count]["3P%"]) + ")"
+       }
+     })
+     .on("end", function() {
+       count++;
+       if(count >= dataset.length) {
+         return
+       } else {
+         console.log(dataset[count]["3P%"]);
+         repeat()
+       }
+     })
+
+  svg.select("#title")
+     .transition()
+     .delay(() => count * 3000)
+     .duration(3000)
+     .text("Harden " + dataset[count]["Year"]);
+  }
+
+
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+    data.forEach(function(d) {
+      d["Year"] = +d["Year"];
+      d["MP"] = +d["MP"];
+      d["PTS"] = +d["PTS"];
+      d["FG"] = +d["FG"];
+      d["FGA"] = +d["FGA"];
+      d["FG%"] = +d["FG%"];
+      d["3P"] = +d["3P"];
+      d["3PA"] = +d["3PA"];
+      d["3P%"] = +d["3P%"];
+      d["2P"] = +d["2P"];
+      d["2PA"] = +d["2PA"];
+      d["2P%"] = +d["2P%"];
+      d["eFG%"] = +d["eFG%"];
+      d["FT"] = +d["FT"];
+      d["FTA"] = +d["FTA"];
+      d["FT%"] = +d["FT%"];
+    })
+    return data
+    }
+</script>
+</head>
+<body>
+<div id="bod"></div>
+<div>
+  <button type="button" id="btn">Click Me</button>
+</div>
+  <script>
+      d3.csv('test_for_grid.csv').then(convert).then(drawGrid);
+  </script>
+
+</body>
+</html>
