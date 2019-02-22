@@ -43,3 +43,12 @@ text {
   font-size: 16px;
   line-height: 20px;
 }
+
+div#bod {
+  width: 500px;
+  overflow-x: scroll;
+}
+
+div#bod p {
+  color: pink;
+}

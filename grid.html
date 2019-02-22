@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>D3 Page Template</title>
+<title>Hoop Dreams Grid</title>
 <script type="text/javascript" src="d3.js"></script>
 <link rel="stylesheet" href="styles.css" type="text/css">
 
@@ -14,7 +14,6 @@
       gridSize = Math.floor(width / 10),
       legendElementWidth = gridSize * 2,
       buckets = 5,
-      // colors = ["#ffffd9",#c7e9b4","#7fcdbb",#1d91c0",#253494"],
       dataset = data,
       count = 0;
 
@@ -38,8 +37,6 @@
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .attr("id", "main-svg")
-      // .append("g")
-      // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   svg.selectAll("rect")
      .data(d3.range(100))
@@ -75,11 +72,6 @@
   })
 
   function repeat() {
-  //   if(count < dataset.length - 1) {
-  //   count+=1
-  // } else {
-  //   count = 0
-  // }
   console.log("START REPEAT", count);
    twos = Math.round((dataset[count]["2P"] * 2) / dataset[count]["PTS"] * 100)
 

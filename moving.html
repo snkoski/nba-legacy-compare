@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D3 Page Template</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawLine(dataset) {
+  let n = 40
+
+  let count = 0
+
+  let data1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
+
+  let data2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
+
+  let data3 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
+
+  let max = Math.max(dataset[0].length, dataset[1].length, dataset[2].length);
+
+  let w = 500
+  let h = 400
+  let margin = 40
+  let svg = d3.select("#bod")
+              .append("svg")
+              .attr("width", w)
+              .attr("height", h);
+
+  let  g = svg.append("g").attr("transform", "translate(" + margin + "," + margin + ")");
+  var x = d3.scaleLinear()
+      .domain([0, n - 1])
+      .range([0, w]);
+  var y = d3.scaleLinear()
+      .domain([0, 70])
+      .range([h - margin, 0]);
+  var line = d3.line()
+      .x(function(d, i) { return x(i); })
+      .y(function(d, i) { return y(d); });
+  g.append("defs").append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("width", w)
+      .attr("height", h);
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + y(0) + ")")
+      .call(d3.axisBottom(x));
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y));
+  g.append("g")
+      .attr("clip-path", "url(#clip)")
+    .append("path")
+      .datum(data1)
+      .attr("class", "line")
+      .attr("id", "line1")
+      .attr("fill", "none")
+      .attr("stroke", "red")
+    .transition()
+      .duration(50)
+      .ease(d3.easeLinear)
+      .on("start", tick);
+
+  g.append("g")
+      .attr("clip-path", "url(#clip)")
+    .append("path")
+      .datum(data2)
+      .attr("class", "line")
+      .attr("id", "line2")
+      .attr("fill", "none")
+      .attr("stroke", "blue")
+    .transition()
+      .duration(50)
+      .ease(d3.easeLinear)
+      .on("start", tick2);
+
+  g.append("g")
+      .attr("clip-path", "url(#clip)")
+    .append("path")
+      .datum(data3)
+      .attr("class", "line")
+      .attr("id", "line3")
+      .attr("fill", "none")
+      .attr("stroke", "green")
+    .transition()
+      .duration(50)
+      .ease(d3.easeLinear)
+      .on("start", tick3);
+
+  function tick() {
+  // console.log("STRING", string);
+    // Push a new data point onto the back.
+    if(count < dataset[0].length) {
+      data1.push(dataset[0][count]['points']);
+    } else {
+      data1.push(0)
+    }
+
+    // Redraw the line.
+    d3.select("#line1")
+        .attr("d", line)
+        .attr("transform", null);
+
+    // Slide it to the left.
+    d3.active(this)
+        .attr("transform", "translate(" + x(-1) + ",0)")
+
+        .transition()
+          .on("start", tick);
+        // Pop the old data point off the front.
+        data1.shift();
+
+  }
+  function tick2() {
+    // Push a new data point onto the back.
+    if(count < dataset[1].length) {
+      data2.push(dataset[1][count]['points']);
+    } else {
+      data2.push(0)
+    }
+    // Redraw the line.
+    d3.select("#line2")
+        .attr("d", line)
+        .attr("transform", null);
+
+    // Slide it to the left.
+    d3.active(this)
+        .attr("transform", "translate(" + x(-1) + ",0)")
+
+        .transition()
+          .on("start", tick2);
+        // Pop the old data point off the front.
+        data2.shift();
+      }
+
+  function tick3() {
+
+    // Push a new data point onto the back.
+    if(count < dataset[2].length) {
+      data3.push(dataset[2][count]['points']);
+      count++
+    } else {
+      data3.push(0)
+    }
+    // Redraw the line.
+    d3.select("#line3")
+        .attr("d", line)
+        .attr("transform", null);
+
+    // Slide it to the left.
+    d3.active(this)
+        .attr("transform", "translate(" + x(-1) + ",0)")
+
+        .transition()
+          .on("start", tick3);
+        // Pop the old data point off the front.
+        data3.shift();
+      }
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+  for(count in data) {
+    // console.log("DATA COUNT", data[count]);
+    data[count].forEach(function(d) {
+      // console.log("D", d);
+      d["index"] = +d["index"]
+      d["dates"] = new Date(d["dates"]);
+      d["points"] = +d["points"];
+    })
+  }
+console.log("DATA", data);
+    return data
+    }
+</script>
+</head>
+<body>
+<div id="bod">
+  <p>HELLO</p>
+</div>
+<!-- <div>
+  <button type="button" id="btn">Click Me</button>
+</div> -->
+  <script>
+       Promise.all([d3.csv("jordan_points.csv"), d3.csv("harden_points.csv"),d3.csv("james_points.csv") ]).then(convert).then(drawLine);
+  </script>
+
+</body>
+</html>
