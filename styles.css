@@ -44,7 +44,7 @@ text {
   line-height: 20px;
 }
 
-div#bod {
+div#bod.moving {
   width: 500px;
   overflow-x: scroll;
 }

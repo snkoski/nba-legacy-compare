@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>D3 Page Template</title>
+<title>Hoop Dreams Line</title>
 <script type="text/javascript" src="d3.js"></script>
 <link rel="stylesheet" href="styles.css" type="text/css">
 
@@ -58,7 +58,7 @@
       .attr("fill", "none")
       .attr("stroke", "red")
     .transition()
-      .duration(50)
+      .duration(200)
       .ease(d3.easeLinear)
       .on("start", tick);
 
@@ -71,7 +71,7 @@
       .attr("fill", "none")
       .attr("stroke", "blue")
     .transition()
-      .duration(50)
+      .duration(200)
       .ease(d3.easeLinear)
       .on("start", tick2);
 
@@ -84,7 +84,7 @@
       .attr("fill", "none")
       .attr("stroke", "green")
     .transition()
-      .duration(50)
+      .duration(200)
       .ease(d3.easeLinear)
       .on("start", tick3);
 
@@ -175,7 +175,7 @@ console.log("DATA", data);
 </script>
 </head>
 <body>
-<div id="bod">
+<div id="bod" class="moving">
   <p>HELLO</p>
 </div>
 <!-- <div>
