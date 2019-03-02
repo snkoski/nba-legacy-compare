@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="styles.css" type="text/css">
 
 <script type="text/javascript"> function drawLine(dataset) {
+  console.log("COLOR", d3.interpolateHsl(297));
   let n = 40
 
   let count = 0
@@ -37,6 +38,8 @@
   var line = d3.line()
       .x(function(d, i) { return x(i); })
       .y(function(d, i) { return y(d); });
+
+
   g.append("defs").append("clipPath")
       .attr("id", "clip")
     .append("rect")
@@ -58,7 +61,7 @@
       .attr("fill", "none")
       .attr("stroke", "red")
     .transition()
-      .duration(200)
+      .duration(150)
       .ease(d3.easeLinear)
       .on("start", tick);
 
@@ -71,7 +74,7 @@
       .attr("fill", "none")
       .attr("stroke", "blue")
     .transition()
-      .duration(200)
+      .duration(150)
       .ease(d3.easeLinear)
       .on("start", tick2);
 
@@ -84,7 +87,7 @@
       .attr("fill", "none")
       .attr("stroke", "green")
     .transition()
-      .duration(200)
+      .duration(150)
       .ease(d3.easeLinear)
       .on("start", tick3);
 

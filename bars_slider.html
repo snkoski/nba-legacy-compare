@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hoop Dreams Bar Chart</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawBar(data) {
+
+	let w = 600;
+	let h = 250;
+	let stat = "eFG%"
+
+	dataset = [];
+	for(let i = 0; i < data.length; i++) {
+		dataset.push({
+			"Player Name": data[i]["Player Name"],
+			"STAT": data[i][stat]
+		})
+
+	}
+	let xScale = d3.scaleBand()
+		.domain(d3.range(dataset.length))
+		.rangeRound([0, w])
+		.paddingInner(0.05);
+
+	let yScale = d3.scaleLinear()
+		.domain([0, d3.max(dataset, function(d) {return d["STAT"]})])
+		.range([0, h]);
+
+	let key = function(d) {
+		return d["Player Name"];
+	};
+
+	let svg = d3.select("body")
+		.append("svg")
+		.attr("width", w)
+		.attr("height", h);
+
+	svg.selectAll("rect")
+		.data(dataset, key)
+		.enter()
+		.append("rect")
+		.attr("x", (d, i) => xScale(i) )
+		.attr("y", (d) => h - yScale(d["STAT"]) )
+		.attr("width", xScale.bandwidth())
+		.attr("height", (d) => yScale(d["STAT"]) )
+		.attr("fill", (d) => "rgb(0, 0, " + (d["STAT"] * 10) + ")" );
+
+	svg.selectAll("text")
+		.data(dataset, key)
+		.enter()
+		.append("text")
+		.text((d) => d["STAT"] )
+		.attr("text-anchor", "middle")
+		.attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+		.attr("y", (d) => h - yScale(d["STAT"]) + 14 )
+		.attr("font-family", "sans-serif")
+		.attr("font-size", "11px")
+		.attr("fill", "white");
+
+	d3.select(".slider-input")
+		.on("change", function() {
+
+			let threshold = +d3.select(this).node().value;
+
+			svg.selectAll("rect")
+				.attr("fill", (d) => "rgb(0, 0, " + (d["STAT"] * 10) + ")" )
+				.filter(function(d)
+				{ return  d["STAT"] <= threshold })
+				.attr("fill", "red");
+		});
+	return dataset
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+
+    data.forEach(function(d) {
+      d["AST"] = +d["AST"];
+      d["FG3%"] = +d["FG3%"];
+      d["FG%"] = +d["FG%"];
+      d["FT%"] = +d["FT%"];
+      d["G"] = +d["G"];
+      d["PER"] = +d["PER"];
+      d["PTS"] = +d["PTS"];
+      d["TRB"] = +d["TRB"];
+      d["WS"] = +d["WS"];
+      d["eFG%"] = +d["eFG%"];
+    })
+    return data
+    }
+</script>
+<script type="text/javascript"> function addSlider(data) {
+
+	let result = data.map(a => a["eFG%"]);
+	let min = Math.min(...result)
+	let max = Math.max(...result)
+
+	let body = document.getElementsByTagName("body")
+
+	let paragraph = document.createElement("p")
+	paragraph.setAttribute("class", "slider-p")
+
+	let newInput = document.createElement("input")
+	newInput.setAttribute("id", "slider")
+	newInput.setAttribute("class", "slider-input")
+	newInput.setAttribute("type", "range")
+	newInput.setAttribute("min", min)
+	newInput.setAttribute("max", max)
+	newInput.setAttribute("step", (max - min) / 10)
+	newInput.setAttribute("value", min)
+	newInput.setAttribute("orient", "vertical")
+
+	paragraph.appendChild(newInput)
+	body[0].appendChild(paragraph)
+	return data
+}
+</script>
+</head>
+<body>
+<!-- <div id="bod" style="clear: both;"></div> -->
+	<!-- <p class="slider-p">
+		<input id="slider" class="slider-input" type="range" min="0" max="30" step="1" value="0" orient="vertical">
+	</p> -->
+  <script>
+      d3.csv('recent_player_stats.csv').then(convert).then(addSlider).then(drawBar);
+  </script>
+
+</body>
+</html>

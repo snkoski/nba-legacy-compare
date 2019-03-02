@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hoop Dreams Line</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawScatter(dataset) {
+
+  let w = 900;
+  let h = 600;
+  let padding = 40;
+
+  // helper function to get min and max from 2d array
+  function getMinMax(arr, idx) {
+    let indexArr = dataset.map((el) => el[idx])
+    return {
+      min: Math.min.apply(null, indexArr),
+      max: Math.max.apply(null, indexArr)
+    }
+  }
+
+  let minMinMax = getMinMax(dataset, 0);
+  let ptsMinMax = getMinMax(dataset, 1);
+
+  let xScale = d3.scaleLinear()
+    .domain([minMinMax.min, minMinMax.max])
+    .range([padding, w - padding / 2]);
+
+  let yScale = d3.scaleLinear()
+    .domain([ptsMinMax.min, ptsMinMax.max])
+    .range([h - padding, padding / 2]);
+
+  let xAxis = d3.axisBottom()
+    .scale(xScale)
+    .ticks(5);
+
+  let yAxis = d3.axisLeft()
+    .scale(yScale)
+    .ticks(5);
+
+  let svg = d3.select("body")
+    .append("svg")
+    .attr("width", w)
+    .attr("height", h);
+
+  let allCircles = svg.selectAll("circle")
+    .data(dataset)
+    .enter()
+    .append("circle")
+    .attr("cx", (d) => xScale(d[0]))
+    .attr("cy", (d) => yScale(d[1]))
+    .attr("r", 3)
+    .attr("fill", "rgb(0, 0, 0, 0.1)");
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + (h - padding) + ")")
+    .call(xAxis);
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + padding + ",0)")
+    .call(yAxis);
+
+  d3.selectAll("input")
+    .on("click", function() {
+
+      let threshold = +d3.select(this).node().value;
+
+      allCircles.attr("fill", "rgb(0, 0, 255, 0.2)")
+        .filter((d) => d[1] <= threshold)
+        .attr("fill", "rgb(255, 0, 0, 0.2)")
+    })
+
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+    let dataset = []
+    data.forEach(function(d) {
+      d["index"] = +d["index"];
+      d["date"] = new Date(d["date"]);
+      d["points"] = +d["points"];
+      d["minutes"] = +d["minutes"];
+    })
+    for(let i = 0; i < data.length; i++) {
+      dataset.push([data[i]["minutes"], data[i]["points"]])
+    }
+    return dataset;
+    }
+</script>
+</head>
+<body>
+<div id="bod" class="moving">
+  <p>Scatter Plot with Radio Buttons</p>
+  <p>
+    <input type="radio" class="scatter-radio" name="filterPreset" value="10"/> 10
+    <input type="radio" class="scatter-radio" name="filterPreset" value="20"/> 20
+    <input type="radio" class="scatter-radio" name="filterPreset" value="30"/> 30
+    <input type="radio" class="scatter-radio" name="filterPreset" value="40"/> 40
+    <input type="radio" class="scatter-radio" name="filterPreset" value="50"/> 50
+    <input type="radio" class="scatter-radio" name="filterPreset" value="60"/> 60
+    <input type="radio" class="scatter-radio" name="filterPreset" value="70"/> 70
+
+  </p>
+</div>
+<!-- <div>
+  <button type="button" id="btn">Click Me</button>
+</div> -->
+  <script>
+       d3.csv("jordan_points_minutes.csv").then(convert).then(drawScatter);
+  </script>
+
+</body>
+</html>

@@ -52,3 +52,18 @@ div#bod.moving {
 div#bod p {
   color: pink;
 }
+
+.slider-p {
+  display: inline-block;
+}
+
+.slider-input {
+  height: 250px;
+  width: 30px;
+  -webkit-appearance: slider-vertical;
+  writing-mode: bt-lr;
+}
+
+.scatter-radio {
+  margin-left: 40px;
+}

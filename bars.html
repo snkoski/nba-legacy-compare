@@ -268,6 +268,9 @@ svg = d3.select("body")
 </div>
 </div>
 <div id="bod" style="clear: both;"></div>
+  <p>
+    <input id="slider" type="range" min="0" max="25" step="1" value="0" orient="vertical">
+  </p>
   <script>
       d3.csv('recent_player_stats.csv').then(convert).then(drawBar);
   </script>
