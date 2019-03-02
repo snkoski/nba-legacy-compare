@@ -7,13 +7,18 @@
 <link rel="stylesheet" href="styles.css" type="text/css">
 
 <script type="text/javascript"> function drawScatter(dataset) {
-  console.log(dataset);
+
   let w = 1200;
   let h = 700;
   let padding = 40
   let player = 0
-  let currentDataLength = dataset[player].length
-
+  let currentDataLength = 0
+  let startArr = []
+  // array that will hold player averages and min & max of stats
+  let fgpAvg = []
+  let ptsAvg = []
+  let fgpMinMax = []
+  let ptsMinMax = []
 
   // helper function to get min and max from 2d array
   function getMinMax(arr, idx) {
@@ -32,17 +37,40 @@
     }) / indexArr.length;
   }
 
-  let fgpAvg = []
-  let ptsAvg = []
-  let fgpMinMax = []
-  let ptsMinMax = []
-
+  // setting arrays with averages and min/max
   for(let i = 0; i < dataset.length; i++) {
-
     fgpAvg.push(getAvg(dataset[i], 0))
     ptsAvg.push(getAvg(dataset[i], 1))
     fgpMinMax.push(getMinMax(dataset[i], 0))
     ptsMinMax.push(getMinMax(dataset[i], 1))
+  }
+
+  // function to toggle background from white to black
+  let toggleBG = (function() {
+    let bgColor = "#ffffff";
+    return function() {
+      bgColor = bgColor == "#ffffff" ? "#000000" : "#ffffff";
+      d3.select("svg").style("background-color", bgColor)
+    }
+  })();
+
+  // function to display wins or loses on button click
+  let filterWinLose = function(d, i) {
+    if(d[2] === result){
+      d3.select(this)
+        .transition()
+        .duration(3000)
+        .on("start",  () => {
+          d3.select(this)
+          .attr("r", 10)
+        })
+        .attr("r", 4)
+    } else {
+        d3.select(this)
+          .transition()
+          .duration(3000)
+          .attr("r", .25)
+      }
   }
 
   let xScale = d3.scaleLinear()
@@ -66,15 +94,15 @@
   let svg = d3.select("body")
     .append("svg")
     .attr("width", w)
-    .attr("height", h);
+    .attr("height", h)
 
   let allCircles = svg.selectAll("circle")
-    .data(dataset[player])
+    .data(startArr)
     .enter()
     .append("circle")
     .attr("cx", (d) => xScale(d[0]))
     .attr("cy", (d) => yScale(d[1]))
-    .attr("r", 3)
+    .attr("r", 4)
     .attr("fill", "rgb(0, 0, 0, 0.1)");
 
   svg.append("g")
@@ -106,13 +134,13 @@
           .append("circle")
             .attr("cx", w)
             .attr("cy", (d) => yScale(d[1]))
-            .attr("r", 3)
+            .attr("r", 4)
           .merge(newGroup)
           .transition()
           .duration(2500)
             .attr("cx", (d) => xScale(d[0]))
             .attr("cy", (d) => yScale(d[1]))
-            .attr("r", 3)
+            .attr("r", 4)
 
       } else if(dataset[player].length < currentDataLength) {
           newGroup.exit()
@@ -127,7 +155,7 @@
             .duration(2500)
             .attr("cx", (d) => xScale(d[0]))
             .attr("cy", (d) => yScale(d[1]))
-            .attr("r", 3)
+            .attr("r", 4)
       }
 
       // svg.select(".x.axis")
@@ -143,7 +171,6 @@
       currentDataLength = dataset[player].length
 
       let allCircles = svg.selectAll("circle")
-        // .data(dataset[player])
 
       allCircles.filter((d) => d[0] <= fgpAvg[player] && d[1] >= ptsAvg[player])
         .attr("fill", "rgb(255, 0, 255, 0.2)");
@@ -158,48 +185,16 @@
         .attr("fill", "rgb(255, 165, 0, 0.2)");
     })
 
-    d3.select(".win-btn").on("click", function() {
+    d3.selectAll(".WL").on("click", function() {
+      result = this.value
       let allCircles = svg.selectAll("circle")
-
-      allCircles.each(function(d, i) {
-        if(d[2] === "L"){
-        d3.select(this)
-          .transition()
-          .duration(5000)
-          .attr("r", .25)
-          } else {
-            d3.select(this)
-              .transition()
-              .duration(5000)
-              .on("start",  function() {
-                d3.select(this)
-                .attr("r", 10)
-              })
-              .attr("r", 3)
-          }
-      })
+      allCircles.each(filterWinLose)
     })
-    d3.select(".lose-btn").on("click", function() {
-      let allCircles = svg.selectAll("circle")
 
-      allCircles.each(function(d, i) {
-        if(d[2] === "W"){
-        d3.select(this)
-          .transition()
-          .duration(5000)
-          .attr("r", .25)
-          } else {
-            d3.select(this)
-              .transition()
-              .duration(5000)
-              .on("start",  function() {
-                d3.select(this)
-                .attr("r", 10)
-              })
-              .attr("r", 3)
-          }
-      })
+    d3.select(".bg-btn").on("click", function() {
+      return toggleBG()
     })
+
 }
 </script>
 
@@ -227,8 +222,10 @@
 </head>
 <body>
   <div id="bod" class="moving">
-    <button class="win-btn" type="button" name="result"> See Wins</button>
-    <button class="lose-btn" type="button" name="result"> See Loses</button>
+    <button class="bg-btn" type="button" name="background">Background</button>
+    <br>
+    <button class="win-btn WL" type="button" name="W" value="W"> See Wins</button>
+    <button class="lose-btn WL" type="button" name="L" value="L"> See Loses</button>
     <p>Scatter Plot with Radio Buttons</p>
     <p>
       <input type="radio" class="scatter-radio" name="filterPreset" value="0"/> Jordan
