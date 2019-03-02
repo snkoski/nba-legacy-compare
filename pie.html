@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hoop Dreams Line</title>
+  <script type="text/javascript" src="d3.js"></script>
+  <link rel="stylesheet" href="styles.css" type="text/css">
+
+  <script type="text/javascript"> function drawPie(dataset) {
+
+    let array1 = [];
+    for(let key in dataset[0]) {
+      array1.push(dataset[0][key])
+    }
+    console.log(array1);
+    let pie = d3.pie();
+
+    let h = 700;
+    let w = 700;
+    let outerRadius = w / 2;
+    // increase inner (w / 3, etc...) radius to make a doughnut chart
+    let innerRadius = 0;
+
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    let arc = d3.arc()
+      .innerRadius(innerRadius)
+      .outerRadius(outerRadius);
+
+    let svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
+    let arcs = svg.selectAll("g.arc")
+      .data(pie(array1))
+      .enter()
+      .append("g")
+      .attr("class", "arc")
+      .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+
+    arcs.append("path")
+      .attr("fill", function(d, i) {
+        return color(i)
+      })
+      .attr("d", arc);
+
+    arcs.append("text")
+      .attr("transform", function(d) {
+        return "translate(" + arc.centroid(d) + ")";
+      })
+      .attr("text-anchor", "middle")
+      .text(function(d) {
+        return d.value;
+      });
+
+  }
+  </script>
+  <script type="text/javascript"> function convert(data) {
+        data.forEach(function(d) {
+          // d["index"] = +d["index"];
+          d["0-3"] = +d["0-3"];
+          d["3-10"] = +d["3-10"];
+          d["10-16"] = +d["10-16"];
+          d["16-3pt"] = +d["16-3pt"];
+          d["3p"] = +d["3p"];
+        })
+      return data;
+      }
+  </script>
+</head>
+<body>
+  <div id="bod" class="moving">
+
+  </div>
+  <script>
+       d3.csv("harden_distance.csv").then(convert).then(drawPie);
+  </script>
+
+</body>
+</html>
