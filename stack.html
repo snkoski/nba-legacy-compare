@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hoop Dreams Line</title>
+  <script type="text/javascript" src="d3.js"></script>
+  <link rel="stylesheet" href="styles.css" type="text/css">
+
+  <script type="text/javascript"> function drawPie(dataset) {
+
+    let w = 900;
+    let h = 700;
+
+    let stack = d3.stack()
+      .keys(["0-3", "3-10", "10-16", "16-3pt", "3p"])
+      // order stack based on the sum of values of each series , also has ascending
+      // .order(d3.stackOrderDescending);
+
+    let series = stack(dataset);
+
+    let xScale = d3.scaleBand()
+      .domain(d3.range(dataset.length))
+      .range([0, w])
+      .paddingInner(0.05);
+
+    let yScale = d3.scaleLinear()
+      .domain([0,
+        d3.max(dataset, function(d) {
+          return d["0-3"] + d["3-10"] + d["10-16"] + d["16-3pt"] + d["3p"]
+        })
+      ])
+      .range([h, 0]);
+
+    let colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+    let svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h)
+
+    let groups = svg.selectAll("g")
+      .data(series)
+      .enter()
+      .append("g")
+      .style("fill", function(d, i) {
+        return colors(i);
+      });
+
+    let rects = groups.selectAll("rect")
+      .data(function(d) { return d })
+      .enter()
+      .append("rect")
+      .attr("x", function(d, i) {
+        return xScale(i);
+      })
+      .attr("y", function(d) {
+        return yScale(d[1]);
+      })
+      .attr("width", xScale.bandwidth())
+      .attr("height", function(d) {
+        return (yScale(d[0]) - yScale(d[1]));
+      });
+
+
+
+  }
+  </script>
+  <script type="text/javascript"> function convert(data) {
+        data.forEach(function(d) {
+          // d["index"] = +d["index"];
+          d["0-3"] = +d["0-3"];
+          d["3-10"] = +d["3-10"];
+          d["10-16"] = +d["10-16"];
+          d["16-3pt"] = +d["16-3pt"];
+          d["3p"] = +d["3p"];
+        })
+      return data;
+      }
+  </script>
+</head>
+<body>
+  <div id="bod" class="moving">
+
+  </div>
+  <script>
+       d3.csv("harden_distance.csv").then(convert).then(drawPie);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hoop Dreams Line</title>
+  <script type="text/javascript" src="d3.js"></script>
+  <link rel="stylesheet" href="styles.css" type="text/css">
+
+  <script type="text/javascript"> function drawPie() {
+
+    let w = 500;
+    let h = 500;
+
+    let dataset = { nodes: [
+                { name: "James Harden" },
+                { name: "Russell Westbrook" },
+                { name: "Stephen Curry" },
+                { name: "Kevin Durant" },
+                { name: "Lebron James" },
+                { name: "Derrick Rose" },
+                { name: "Kobe Bryant" },
+                { name: "Dirk Nowitzki" },
+                { name: "Steve Nash" },
+                { name: "Kevin Garnett" },
+                { name: "Tim Duncan" },
+                { name: "Allen Iverson" },
+                { name: "Shaquille O'Neal" },
+                { name: "Karl Malone" },
+                { name: "Michael Jordan" }
+
+
+            ],
+            edges: [
+                { source: 0, target: 1 },
+                { source: 0, target: 3 },
+                { source: 1, target: 3 },
+                { source: 2, target: 3 },
+                { source: 4, target: 5 },
+                { source: 4, target: 12 },
+                { source: 6, target: 8 },
+                { source: 6, target: 12 },
+                { source: 6, target: 13 },
+                { source: 7, target: 8 },
+                { source: 8, target: 12 },
+                { source: 9, target: 12 },
+                { source: 12, target: 13 }
+    ] };
+    console.log(dataset);
+
+    let colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+    let force = d3.forceSimulation(dataset.nodes)
+      .force("charge", d3.forceManyBody().strength(-30))
+      .force("link", d3.forceLink(dataset.edges).distance(85))
+      .force("center", d3.forceCenter().x(w/2).y(h/2));
+
+    let svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
+    let edges = svg.selectAll("line")
+      .data(dataset.edges)
+      .enter()
+      .append("line")
+      .style("stroke", "#cccccc")
+      .style("stroke-width", 1);
+
+    let nodes = svg.selectAll("circle")
+      .data(dataset.nodes)
+      .enter()
+      .append("circle")
+      .attr("r", 10)
+      .style("fill", function(d, i) {
+        return colors(i);
+      })
+      .call(d3.drag()
+        .on("start", dragStarted)
+        .on("drag", dragging)
+        .on("end", dragEnded));
+
+    nodes.append("title")
+      .text(function(d) {
+        return d.name
+      });
+
+    force.on("tick", function() {
+      edges.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+      nodes.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+    })
+
+    function dragStarted(d) {
+      if(!d3.event.active) force.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragging(d) {
+      d.fx = d3.event.x;
+      d.fy = d3.event.y;
+    }
+
+    function dragEnded(d) {
+      if(!d3.event.active) force.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+  }
+  </script>
+  <script type="text/javascript"> function convert(data) {
+        data.forEach(function(d) {
+          // d["index"] = +d["index"];
+          d["0-3"] = +d["0-3"];
+          d["3-10"] = +d["3-10"];
+          d["10-16"] = +d["10-16"];
+          d["16-3pt"] = +d["16-3pt"];
+          d["3p"] = +d["3p"];
+        })
+      return data;
+      }
+  </script>
+</head>
+<body>
+  <div id="bod" class="moving">
+
+  </div>
+  <script>
+       drawPie()
+  </script>
+
+</body>
+</html>
