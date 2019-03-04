@@ -8,12 +8,13 @@
 
 <script type="text/javascript"> function drawScatter(dataset) {
 
-  let w = 1200;
-  let h = 700;
+  let w = 1100;
+  let h = 650;
   let padding = 40
   let player = 0
   let currentDataLength = 0
   let startArr = []
+  let playerAvg = 0
   // array that will hold player averages and min & max of stats
   let fgpAvg = []
   let ptsAvg = []
@@ -115,19 +116,16 @@
     .attr("transform", "translate(" + padding + ",0)")
     .call(yAxis);
 
-  d3.selectAll("input")
+  d3.selectAll(".scatter-radio.stats")
     .on("click", function() {
 
       player = d3.select(this).node().value;
       // yScale.domain([ptsMinMax[player].min, ptsMinMax[player].max])
       // xScale.domain([fgpMinMax[player].min, fgpMinMax[player].max])
-
-      for( let i = 0; i < dataset[player].length; i++) {
-        console.log('hi', dataset[player][i][2])
-      }
+      d3.selectAll(".scatter-radio.avg").nodes()[player].checked = true
 
       let newGroup = svg.selectAll("circle")
-                        .data(dataset[player])
+        .data(dataset[player])
 
       if(dataset[player].length > currentDataLength) {
         newGroup.enter()
@@ -170,19 +168,7 @@
 
       currentDataLength = dataset[player].length
 
-      let allCircles = svg.selectAll("circle")
-
-      allCircles.filter((d) => d[0] <= fgpAvg[player] && d[1] >= ptsAvg[player])
-        .attr("fill", "rgb(255, 0, 255, 0.2)");
-
-      allCircles.filter((d) => d[0] <= fgpAvg[player] && d[1] < ptsAvg[player])
-        .attr("fill", "rgb(0, 0, 255, 0.2)");
-
-      allCircles.filter((d) => d[0] > fgpAvg[player] && d[1] >= ptsAvg[player])
-        .attr("fill", "rgb(255, 0, 0, 0.2)");
-
-      allCircles.filter((d) => d[0] > fgpAvg[player] && d[1] < ptsAvg[player])
-        .attr("fill", "rgb(255, 165, 0, 0.2)");
+      changeColor(player)
     })
 
     d3.selectAll(".WL").on("click", function() {
@@ -194,6 +180,27 @@
     d3.select(".bg-btn").on("click", function() {
       return toggleBG()
     })
+
+    d3.selectAll(".scatter-radio.avg").on("click", function() {
+      playerAvg = d3.select(this).node().value;
+      changeColor(playerAvg)
+    })
+
+    function changeColor(playerAvg) {
+      let allCircles = svg.selectAll("circle")
+
+      allCircles.filter((d) => d[0] <= fgpAvg[playerAvg] && d[1] >= ptsAvg[playerAvg])
+        .attr("fill", "rgb(255, 0, 255, 0.2)");
+
+      allCircles.filter((d) => d[0] <= fgpAvg[playerAvg] && d[1] < ptsAvg[playerAvg])
+        .attr("fill", "rgb(0, 0, 255, 0.2)");
+
+      allCircles.filter((d) => d[0] > fgpAvg[playerAvg] && d[1] >= ptsAvg[playerAvg])
+        .attr("fill", "rgb(255, 0, 0, 0.2)");
+
+      allCircles.filter((d) => d[0] > fgpAvg[playerAvg] && d[1] < ptsAvg[playerAvg])
+        .attr("fill", "rgb(255, 165, 0, 0.2)");
+    }
 
 }
 </script>
@@ -227,10 +234,15 @@
     <button class="win-btn WL" type="button" name="W" value="W"> See Wins</button>
     <button class="lose-btn WL" type="button" name="L" value="L"> See Loses</button>
     <p>Scatter Plot with Radio Buttons</p>
-    <p>
-      <input type="radio" class="scatter-radio" name="filterPreset" value="0"/> Jordan
-      <input type="radio" class="scatter-radio" name="filterPreset" value="1"/> Harden
-      <input type="radio" class="scatter-radio" name="filterPreset" value="2"/> Lebron
+    <p>Results
+      <input type="radio" class="scatter-radio stats" name="filterPreset" value="0"/> Jordan
+      <input type="radio" class="scatter-radio stats" name="filterPreset" value="1"/> Harden
+      <input type="radio" class="scatter-radio stats" name="filterPreset" value="2"/> Lebron
+    </p>
+    <p>Averages
+      <input type="radio" class="scatter-radio avg" name="avgColor" value="0"/> Jordan
+      <input type="radio" class="scatter-radio avg" name="avgColor" value="1"/> Harden
+      <input type="radio" class="scatter-radio avg" name="avgColor" value="2"/> Lebron
     </p>
   </div>
   <script>
