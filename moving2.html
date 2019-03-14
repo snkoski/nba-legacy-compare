@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hoop Dreams Line</title>
+<script type="text/javascript" src="d3.js"></script>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+<script type="text/javascript"> function drawLine(dataset) {
+  // count will be used to push new numbers from the dataset to the line arrays
+  let count = 0
+  // pointDict will hold the arrays that are used to draw lines of the graph
+  let lineDict = {}
+  // set how many datapoints you want each line to display
+  let lineLength = 40;
+
+  let numPlayers = dataset.length
+  // create an array for each player, each array is initialized with zeros so first datapoints will appear on the right side of graph istead of already at the end
+  for(let i = 0; i < dataset.length; i++) {
+    lineDict[i] = new Array(lineLength).fill(0);
+  }
+  let colorArray = ["red", "blue", "green"]
+
+  let w = 500
+  let h = 400
+  let margin = 40
+
+  let svg = d3.select("#bod")
+    .append("svg")
+    .attr("width", w)
+    .attr("height", h);
+
+  let  g = svg.append("g")
+    .attr("transform", "translate(" + margin + "," + margin + ")");
+
+  let xScale = d3.scaleLinear()
+    .domain([0, lineLength])
+    .range([0, w]);
+
+  let yScale = d3.scaleLinear()
+    .domain([0, 70])
+    .range([h - margin, 0]);
+
+  let line = d3.line()
+    .x((d, i) => xScale(i))
+    .y((d, i) => yScale(d));
+
+  g.append("defs").append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("width", w)
+      .attr("height", h);
+  g.append("g")
+      .attr("class", "axis x")
+      .attr("transform", "translate(0," + yScale(0) + ")")
+      .call(d3.axisBottom(xScale));
+  g.append("g")
+      .attr("class", "axis y")
+      .call(d3.axisLeft(yScale));
+
+  for(let i = 0; i < numPlayers; i++) {
+    g.append("g")
+        .attr("clip-path", "url(#clip)")
+      .append("path")
+        .datum(lineDict[i])
+        .attr("class", "line")
+        .attr("id", "line" + i)
+        .attr("fill", "none")
+        .attr("stroke", colorArray[i])
+      .transition()
+        .duration(150)
+        .ease(d3.easeLinear)
+        .on("start", function() {
+          tick(this, i, lineDict[i])
+        });
+  }
+
+  const tick = (element, index, data) => {
+    // Push a new data point onto the array until dataset is out of numbers
+    if(count < dataset[index].length) {
+      data.push(dataset[index][count]['points']);
+      if(index == numPlayers - 1) {
+        count++
+      }
+    } else {
+      data.push(0)
+    }
+    // Redraw the line.
+    d3.select(`#${element.id}`)
+        .attr("d", line)
+        // needed for smooth movment
+        .attr("transform", null);
+    // Slide line to the left.
+    d3.active(element)
+        .attr("transform", "translate(" + xScale(-1) + ",0)")
+        .transition()
+          .on("start", function() {
+            tick(element, index, data)
+          });
+        // Pop the old data point off the front of the array
+        data.shift();
+  }
+}
+</script>
+<script type="text/javascript"> function convert(data) {
+  for(count in data) {
+    data[count].forEach(function(d) {
+      d["index"] = +d["index"]
+      d["dates"] = new Date(d["dates"]);
+      d["points"] = +d["points"];
+    })
+  }
+    return data
+    }
+</script>
+</head>
+<body>
+<div id="bod" class="moving">
+  <p>HELLO</p>
+</div>
+  <script>
+       Promise.all([d3.csv("jordan_points.csv"), d3.csv("harden_points.csv"),d3.csv("james_points.csv") ]).then(convert).then(drawLine);
+  </script>
+
+</body>
+</html>

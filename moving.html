@@ -63,7 +63,9 @@
     .transition()
       .duration(150)
       .ease(d3.easeLinear)
-      .on("start", tick);
+      .on("start", function() {
+        tick(this, 0, data1)
+      });
 
   g.append("g")
       .attr("clip-path", "url(#clip)")
@@ -91,28 +93,36 @@
       .ease(d3.easeLinear)
       .on("start", tick3);
 
-  function tick() {
+
+  let pathsvar = d3.selectAll("path")
+    console.log(pathsvar);
+
+  function tick(element, index, data) {
   // console.log("STRING", string);
     // Push a new data point onto the back.
-    if(count < dataset[0].length) {
-      data1.push(dataset[0][count]['points']);
+    if(count < dataset[index].length) {
+      data.push(dataset[index][count]['points']);
+      
     } else {
-      data1.push(0)
+      data.push(0)
     }
+    console.log("THIS1", element);
+    console.log("THIS1", this);
 
     // Redraw the line.
-    d3.select("#line1")
+    d3.select(`#${element.id}`)
         .attr("d", line)
         .attr("transform", null);
-
     // Slide it to the left.
-    d3.active(this)
+    d3.active(element)
         .attr("transform", "translate(" + x(-1) + ",0)")
 
         .transition()
-          .on("start", tick);
+          .on("start", function() {
+            tick(element, 0, data)
+          });
         // Pop the old data point off the front.
-        data1.shift();
+        data.shift();
 
   }
   function tick2() {
