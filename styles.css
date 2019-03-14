@@ -67,3 +67,8 @@ div#bod p {
 .scatter-radio {
   margin-left: 40px;
 }
+
+.hiddeny {
+  display: none;
+  fill: black;
+}

@@ -5,8 +5,17 @@
 <title>Hoop Dreams Line</title>
 <script type="text/javascript" src="d3.js"></script>
 <link rel="stylesheet" href="styles.css" type="text/css">
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
 
 <script type="text/javascript"> function drawLine(dataset) {
+  let body = document.getElementById("bod")
+  let playerNames = ["Jordan", "Harden", "LeBron"]
+  let colorArray = ["red", "blue", "green"]
+
   // count will be used to push new numbers from the dataset to the line arrays
   let count = 0
   // pointDict will hold the arrays that are used to draw lines of the graph
@@ -15,11 +24,19 @@
   let lineLength = 40;
 
   let numPlayers = dataset.length
+
+  for (let i = 0; i < numPlayers; i++) {
+    let button = document.createElement("button")
+    button.setAttribute("id", "btn-" + i)
+    button.style.background = colorArray[i]
+    button.innerHTML = playerNames[i]
+    body.appendChild(button)
+  }
   // create an array for each player, each array is initialized with zeros so first datapoints will appear on the right side of graph istead of already at the end
   for(let i = 0; i < dataset.length; i++) {
     lineDict[i] = new Array(lineLength).fill(0);
   }
-  let colorArray = ["red", "blue", "green"]
+
 
   let w = 500
   let h = 400
@@ -68,12 +85,25 @@
         .attr("fill", "none")
         .attr("stroke", colorArray[i])
       .transition()
+      .delay(5000)
         .duration(150)
         .ease(d3.easeLinear)
         .on("start", function() {
           tick(this, i, lineDict[i])
         });
   }
+    d3.selectAll("button").on("click", function() {
+      let selection = d3.select(`#line`+this.id.slice(4))
+        console.log(selection._groups[0]);
+      if(!selection._groups[0][0].classList.contains("hidden")) {
+        selection.classed("hidden", true)
+      } else {
+        selection.classed("hidden", false)
+      }
+      //
+
+    })
+
 
   const tick = (element, index, data) => {
     // Push a new data point onto the array until dataset is out of numbers
