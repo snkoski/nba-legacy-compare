@@ -45,7 +45,7 @@ text {
 }
 
 div#bod.moving {
-  /* width: 500px; */
+  width: 500px;
   overflow-x: scroll;
 }
 
