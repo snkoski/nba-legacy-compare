@@ -45,7 +45,7 @@ text {
 }
 
 div#bod.moving {
-  width: 500px;
+  /* width: 500px; */
   overflow-x: scroll;
 }
 
@@ -68,7 +68,7 @@ div#bod p {
   margin-left: 40px;
 }
 
-.hiddeny {
+/* .hiddeny {
   display: none;
   fill: black;
-}
+} */

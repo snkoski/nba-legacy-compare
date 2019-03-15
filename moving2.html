@@ -13,8 +13,21 @@
 
 <script type="text/javascript"> function drawLine(dataset) {
   let body = document.getElementById("bod")
+  let newDiv = document.createElement("div")
+  let goButton = document.createElement("button")
+  goButton.setAttribute("id", "go-btn")
+  goButton.innerHTML = "Go"
+  newDiv.appendChild(goButton)
+
+
+
+
+
   let playerNames = ["Jordan", "Harden", "LeBron"]
   let colorArray = ["red", "blue", "green"]
+
+
+  let pause = true
 
   // count will be used to push new numbers from the dataset to the line arrays
   let count = 0
@@ -30,16 +43,32 @@
     button.setAttribute("id", "btn-" + i)
     button.style.background = colorArray[i]
     button.innerHTML = playerNames[i]
-    body.appendChild(button)
+    newDiv.appendChild(button)
   }
+
+  body.appendChild(newDiv)
   // create an array for each player, each array is initialized with zeros so first datapoints will appear on the right side of graph istead of already at the end
+  // for(let i = 0; i < dataset.length; i++) {
+  //   lineDict[i] = new Array(lineLength).fill(0);
+  // }
+
+console.log(dataset[0].slice(0, 40));
+
   for(let i = 0; i < dataset.length; i++) {
-    lineDict[i] = new Array(lineLength).fill(0);
+    let temp = []
+    for (let j = 0; j < lineLength; j++) {
+      temp.push(dataset[i][j]["points"])
+
+    }
+    console.log("TEMP", temp);
+    lineDict[i] = temp
   }
+console.log("LINES", lineDict);
 
 
-  let w = 500
-  let h = 400
+
+  let w = 800
+  let h = 600
   let margin = 40
 
   let svg = d3.select("#bod")
@@ -75,37 +104,68 @@
       .attr("class", "axis y")
       .call(d3.axisLeft(yScale));
 
-  for(let i = 0; i < numPlayers; i++) {
-    g.append("g")
-        .attr("clip-path", "url(#clip)")
-      .append("path")
-        .datum(lineDict[i])
-        .attr("class", "line")
-        .attr("id", "line" + i)
-        .attr("fill", "none")
-        .attr("stroke", colorArray[i])
-      .transition()
-      .delay(5000)
-        .duration(150)
-        .ease(d3.easeLinear)
-        .on("start", function() {
-          tick(this, i, lineDict[i])
-        });
-  }
-    d3.selectAll("button").on("click", function() {
-      let selection = d3.select(`#line`+this.id.slice(4))
-        console.log(selection._groups[0]);
-      if(!selection._groups[0][0].classList.contains("hidden")) {
-        selection.classed("hidden", true)
-      } else {
-        selection.classed("hidden", false)
-      }
-      //
+  d3.select("#go-btn").on("click", function() {
+    for(let i = 0; i < numPlayers; i++) {
+      g.append("g")
+          .attr("clip-path", "url(#clip)")
+        .append("path")
+          .datum(lineDict[i])
+          .attr("class", "line")
+          .attr("id", "line" + i)
+          .attr("fill", "none")
+          .attr("stroke", colorArray[i])
+        .transition()
+          .duration(250)
+          .ease(d3.easeLinear)
+          .on("start", function() {
+            tick(this, i, lineDict[i])
+          });
 
-    })
+          d3.selectAll("button").on("click", function() {
+            let selection = d3.select(`#line`+this.id.slice(4))
+              console.log(selection._groups[0]);
+            if(!selection._groups[0][0].classList.contains("hidden")) {
+              selection.classed("hidden", true)
+            } else {
+              selection.classed("hidden", false)
+            }
+            //
+
+          })
+    }
+  })
+
+  // for(let i = 0; i < numPlayers; i++) {
+  //   g.append("g")
+  //       .attr("clip-path", "url(#clip)")
+  //     .append("path")
+  //       .datum(lineDict[i])
+  //       .attr("class", "line")
+  //       .attr("id", "line" + i)
+  //       .attr("fill", "none")
+  //       .attr("stroke", colorArray[i])
+  //     .transition()
+  //       .duration(150)
+  //       .ease(d3.easeLinear)
+  //       .on("start", function() {
+  //         tick(this, i, lineDict[i])
+  //       });
+  // }
+    // d3.selectAll("button").on("click", function() {
+    //   let selection = d3.select(`#line`+this.id.slice(4))
+    //     console.log(selection._groups[0]);
+    //   if(!selection._groups[0][0].classList.contains("hidden")) {
+    //     selection.classed("hidden", true)
+    //   } else {
+    //     selection.classed("hidden", false)
+    //   }
+    //   //
+    //
+    // })
 
 
   const tick = (element, index, data) => {
+
     // Push a new data point onto the array until dataset is out of numbers
     if(count < dataset[index].length) {
       data.push(dataset[index][count]['points']);
@@ -115,6 +175,26 @@
     } else {
       data.push(0)
     }
+    if (count == 0 || (count == 1 && index == numPlayers - 1)) {
+      // if(count == 1) {
+      //   pause = false
+      // }
+      d3.select(`#${element.id}`)
+          .attr("d", line)
+          // needed for smooth movment
+          .attr("transform", null);
+      // Slide line to the left.
+      d3.active(element)
+          .attr("transform", "translate(" + xScale(-1) + ",0)")
+          .transition()
+            .delay(2000)
+            .on("start", function() {
+              tick(element, index, data)
+            });
+          // Pop the old data point off the front of the array
+          data.shift();
+
+    } else {
     // Redraw the line.
     d3.select(`#${element.id}`)
         .attr("d", line)
@@ -124,11 +204,13 @@
     d3.active(element)
         .attr("transform", "translate(" + xScale(-1) + ",0)")
         .transition()
+
           .on("start", function() {
             tick(element, index, data)
           });
         // Pop the old data point off the front of the array
         data.shift();
+      }
   }
 }
 </script>
@@ -145,7 +227,7 @@
 </script>
 </head>
 <body>
-<div id="bod" class="moving">
+<div id="bod" class="">
   <p>HELLO</p>
 </div>
   <script>
