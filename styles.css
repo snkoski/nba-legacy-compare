@@ -72,3 +72,25 @@ div#bod p {
   display: none;
   fill: black;
 } */
+
+#boddiv {
+  float: left;
+}
+
+#side{
+  float: left;
+  color:  red;
+}
+
+#checkArea {
+  /* padding-top: 200px; */
+  /* display: inline; */
+  /* position: absolute; */
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.container {
+  padding-top: 100px;
+  position: absolute;
+}

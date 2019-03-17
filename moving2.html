@@ -17,10 +17,6 @@
   p {
     display: inline;
   }
-
-  /* button {
-    display: inline;
-  } */
 </style>
 
 <script type="text/javascript"> function drawLine(dataset) {
@@ -70,29 +66,18 @@
   const lineDict = {}
   // set how many datapoints you want each line to display
   const lineLength = 40;
-
-
-
   // create an array for each player, each array is initialized with zeros so first datapoints will appear on the right side of graph istead of already at the end
-  // for(let i = 0; i < dataset.length; i++) {
-  //   lineDict[i] = new Array(lineLength).fill(0);
-  // }
   for(let i = 0; i < dataset.length; i++) {
     let temp = []
     for (let j = 0; j < lineLength; j++) {
       temp.push(dataset[i][j]["points"])
-
     }
-    console.log("TEMP", temp);
     lineDict[i] = temp
   }
-console.log("LINES", lineDict);
-
 
   const margin = {top: 50, right: 50, bottom: 50, left: 50};
   const w = 1000 - margin.left - margin.right;
   const h = 600 - margin.top - margin.bottom;
-  const margi = 50
 
   const xScale = d3.scaleLinear()
     .domain([count, lineLength + count])
@@ -118,7 +103,8 @@ console.log("LINES", lineDict);
     .attr("height", h + margin.top + margin.bottom);
 
   const  g = svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("fill", "black")
 
   const line = d3.line()
     .x((d, i) => xScale(i))
@@ -127,8 +113,6 @@ console.log("LINES", lineDict);
   g.append("defs").append("clipPath")
       .attr("id", "clip")
     .append("rect")
-      // .attr("x", margi)
-      // .attr("y", margi)
       .attr("width", w - margin.right)
       .attr("height", h);
 
@@ -137,10 +121,10 @@ console.log("LINES", lineDict);
       .attr("transform", "translate(" + 0 + ", 0)")
       .call(yAxis);
 
-      const axis = g.append("g")
-          .attr("class", "axis x")
-          .attr("transform", "translate(0," + h + ")")
-          .call(axisScale.axis=xAxis);
+  const axis = g.append("g")
+      .attr("class", "axis x")
+      .attr("transform", "translate(0," + h + ")")
+      .call(axisScale.axis=xAxis);
 
   d3.select("#go-btn").on("click", function() {
     for(let i = 0; i < numPlayers; i++) {
@@ -167,9 +151,8 @@ console.log("LINES", lineDict);
         } else {
           selection.classed("hidden", false)
         }
-        //
-
       })
+
       d3.selectAll(".stroke-btn").on("click", function() {
         let selection = d3.select(`#line`+this.id.slice(7))
           console.log(selection._groups[0]);
@@ -178,40 +161,9 @@ console.log("LINES", lineDict);
         } else {
           selection.classed("bold", false)
         }
-        //
-
       })
     }
   })
-
-  // for(let i = 0; i < numPlayers; i++) {
-  //   g.append("g")
-  //       .attr("clip-path", "url(#clip)")
-  //     .append("path")
-  //       .datum(lineDict[i])
-  //       .attr("class", "line")
-  //       .attr("id", "line" + i)
-  //       .attr("fill", "none")
-  //       .attr("stroke", colorArray[i])
-  //     .transition()
-  //       .duration(150)
-  //       .ease(d3.easeLinear)
-  //       .on("start", function() {
-  //         tick(this, i, lineDict[i])
-  //       });
-  // }
-    // d3.selectAll("button").on("click", function() {
-    //   let selection = d3.select(`#line`+this.id.slice(4))
-    //     console.log(selection._groups[0]);
-    //   if(!selection._groups[0][0].classList.contains("hidden")) {
-    //     selection.classed("hidden", true)
-    //   } else {
-    //     selection.classed("hidden", false)
-    //   }
-    //   //
-    //
-    // })
-
 
   const tick = (element, index, data) => {
     if(index == numPlayers - 1) {
@@ -226,9 +178,6 @@ console.log("LINES", lineDict);
       data.push(0)
     }
     if (count == 0 || (count == 1 && index == numPlayers - 1)) {
-      // if(count == 1) {
-      //   pause = false
-      // }
       axis.transition()
             .duration(250)
             .ease(d3.easeLinear)
@@ -241,15 +190,13 @@ console.log("LINES", lineDict);
       d3.active(element)
           .attr("transform", "translate(" + xScale(-1) + ",0)")
           .transition()
-            .delay(2000)
+            .delay(1500)
             .on("start", function() {
               tick(element, index, data)
             });
           // Pop the old data point off the front of the array
           data.shift();
-
     } else {
-
       axis.transition()
             .duration(250)
             .ease(d3.easeLinear)
